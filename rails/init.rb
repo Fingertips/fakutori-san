@@ -1,0 +1,1 @@
+require 'fakutori_san'
