@@ -44,16 +44,34 @@ module FakutoriSan
       end
     end
     
-    def create_one(*type_and_or_attributes)
-      instance = build_one(*type_and_or_attributes)
-      instance.save(false)
+    BOOLS = [true, false]
+    
+    # type:
+    # attributes:
+    # validate:
+    def create_one(*type_and_or_attributes_and_or_validate)
+      args = type_and_or_attributes_and_or_validate
+      
+      validate = args.pop if BOOLS.include?(args.last)
+      instance = build_one(*args)
+      validate ? instance.save! : instance.save(false)
       instance
+    end
+    
+    def create_one!(*type_and_or_attributes)
+      type_and_or_attributes << true
+      create_one(*type_and_or_attributes)
     end
     
     def create(times = nil, *type_and_or_attributes)
       if times
         Array.new(times) { create_one(*type_and_or_attributes) }
       end
+    end
+    
+    def create!(*args)
+      args << true
+      create(*args)
     end
     
     private

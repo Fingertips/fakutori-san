@@ -139,6 +139,25 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     @factory.expects(:create_one).with(:minimal, attributes).times(2).returns({})
     @factory.create(2, :minimal, attributes)
   end
+  
+  it "should perform validations and raise an exception if created with #create_one!" do
+    lambda { @factory.create_one!(:invalid) }.should.raise ActiveRecord::RecordInvalid
+    
+    lambda {
+      instance = @factory.create_one!(:minimal, 'password' => '12345')
+      instance.attributes.except('id', 'email').should == @factory.plan_one(:minimal, 'password' => '12345')
+    }.should.not.raise ActiveRecord::RecordInvalid
+  end
+  
+  it "should call #create_one multiple times and perform validations, and return an array of the resulting record instances" do
+    attributes = { 'name' => 'Eloy' }
+    
+    @factory.expects(:create_one).with(attributes, true).times(2).returns({})
+    @factory.create!(2, attributes)
+    
+    @factory.expects(:create_one).with(:minimal, attributes, true).times(2).returns({})
+    @factory.create!(2, :minimal, attributes)
+  end
 end
 
 describe "The top level Fakutori method" do
