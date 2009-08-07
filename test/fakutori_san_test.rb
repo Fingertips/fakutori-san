@@ -34,7 +34,7 @@ module FakutoriSan
     end
     
     def with_name_scene(member, options)
-      member.update_attributes options
+      member.update_attribute :name, "#{options[:name]}#{options[:index]}"
     end
     
     def associate_to_article(member, article, options)
@@ -288,10 +288,32 @@ describe "FakutoriSan::Fakutori, concerning `scenes'" do
     instance.name.should == 'Alloy'
   end
   
+  it "should invoke a scene method for each record in a collection, assign the index to the options, and return self" do
+    collection = @factory.create!(2)
+    @factory.scene(:with_name, collection, :name => 'Alloy').should == collection
+    collection.each_with_index do |record, index|
+      record.reload.name.should == "Alloy#{index}"
+    end
+  end
+  
   it "should raise a NoMethodError if a requested scene does not exist" do
     lambda {
       @factory.scene(:does_not_exist, @factory.build_one)
     }.should.raise NoMethodError
+  end
+end
+
+describe "FakutoriSan::Collection, concerning `scenes'" do
+  before do
+    @factory = Fakutori(Member)
+    @collection = @factory.create!(2)
+  end
+  
+  it "should call Fakutori#scene with the given scene name, itself, and options" do
+    @collection.apply_scene(:with_name, :name => 'Alloy')
+    @collection.each do |record|
+      record.reload.name.should.match /^Alloy/
+    end
   end
 end
 
@@ -313,7 +335,7 @@ describe "FakutoriSan::FakutoriExt" do
   
   it "should call Fakutori#scene with the record and options given" do
     instance = @factory.create_one
-    instance.apply_scene(:with_name).name.should == 'Eloy'
+    instance.apply_scene(:with_name).reload.name.should == ''
     instance.apply_scene(:with_name, :name => 'Alloy').reload.name.should == 'Alloy'
   end
 end

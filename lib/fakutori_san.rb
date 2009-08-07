@@ -16,6 +16,10 @@ module FakutoriSan
     def associate_to(model, options = nil)
       each { |record| @factory.associate(record, model, options) }
     end
+    
+    def apply_scene(name, options = {})
+      @factory.scene(name, self, options)
+    end
   end
   
   module FakutoriExt
@@ -102,14 +106,20 @@ module FakutoriSan
       end
     end
     
-    def scene(name, record, options = {})
+    def scene(name, record_or_collection, options = {})
       method = "#{name}_scene"
-      if respond_to?(method)
-        send(method, record, options)
+      raise NoMethodError, "#{self.class.name} has no scene method called `#{name.inspect}'" unless respond_to?(method)
+      
+      if record_or_collection.is_a?(Array)
+        record_or_collection.each_with_index do |record, index|
+          options[:index] = index
+          send(method, record, options)
+        end
       else
-        raise NoMethodError, "#{self.class.name} has no scene method called `#{name.inspect}'"
+        send(method, record_or_collection, options)
       end
-      record
+      
+      record_or_collection
     end
     
     private
