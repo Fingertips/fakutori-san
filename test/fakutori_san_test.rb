@@ -29,6 +29,14 @@ module FakutoriSan
       {}
     end
     
+    def with_arg(arg)
+      { 'arg' => arg }
+    end
+    
+    def with_name_scene(member, options)
+      member.update_attributes options
+    end
+    
     def associate_to_article(member, article, options)
     end
     
@@ -126,6 +134,11 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
   it "should merge the given attributes onto the resulting attributes hash" do
     @factory.plan_one('name' => 'Alloy', 'password' => 'supersecret').should ==
       { 'name' => 'Alloy', 'email' => 'eloy@example.com', 'password' => 'supersecret' }
+  end
+  
+  it "should pass the attributes hash to the `plan' method" do
+    @factory.plan_one(:with_arg, 'name' => 'Eloy').should ==
+      { 'name' => 'Eloy', 'arg' => { 'name' => 'Eloy' } }
   end
   
   it "should take an optional first plan `type', which invokes the method by the same name" do
@@ -265,5 +278,29 @@ describe "FakutoriSan::Collection, concerning associating records" do
   it "should forward the options as `nil' by default" do
     @collection.each { |record| @factory.expects(:associate).with(record, Article, nil) }
     @collection.associate_to(Article)
+  end
+end
+
+describe "FakutoriSan::Fakutori, concerning `scenes'" do
+  before do
+    @factory = Fakutori(Member)
+  end
+  
+  it "should invoke a scene method if it exists and return self" do
+    instance = @factory.create_one
+    @factory.scene(:with_name, instance, :name => 'Alloy').should == instance
+    instance.name.should == 'Alloy'
+  end
+  
+  it "should raise a NoMethodError if a requested scene does not exist" do
+    lambda {
+      @factory.scene(:does_not_exist, @factory.build_one)
+    }.should.raise NoMethodError
+  end
+  
+  xit "should invoke a scene method if it exists and return self" do
+    instance = @factory.create_one.apply_scene(:with_name, :name => 'Alloy')
+    instance.should.not.be.new_record
+    instance.name.should == 'Alloy'
   end
 end

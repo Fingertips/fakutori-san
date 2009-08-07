@@ -44,7 +44,8 @@ module FakutoriSan
     
     def plan_one(*type_and_or_attributes)
       type, attributes = type_and_attributes(type_and_or_attributes)
-      send(type).merge(attributes)
+      plan = method(type).arity.zero? ? send(type) : send(type, attributes)
+      plan.merge(attributes)
     end
     
     def plan(*times_and_or_type_and_or_attributes)
@@ -93,8 +94,18 @@ module FakutoriSan
           send(builder, record, to_model)
         end
       else
-        raise NoMethodError, "#{self.class.name} has no association builder defined for given model `#{to_model.inspect}'."
+        raise NoMethodError, "#{self.class.name} has no association builder defined for model `#{to_model.inspect}'."
       end
+    end
+    
+    def scene(name, record, options = {})
+      method = "#{name}_scene"
+      if respond_to?(method)
+        send(method, record, options)
+      else
+        raise NoMethodError, "#{self.class.name} has no scene method called `#{name.inspect}'"
+      end
+      record
     end
     
     private
