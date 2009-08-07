@@ -46,7 +46,7 @@ module FakutoriSan
     
     def create_one(*type_and_or_attributes)
       instance = build_one(*type_and_or_attributes)
-      instance.save
+      instance.save(false)
       instance
     end
     

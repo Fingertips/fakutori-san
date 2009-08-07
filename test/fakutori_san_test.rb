@@ -1,6 +1,7 @@
 require File.expand_path('../test_helper', __FILE__)
 
 class Member < ActiveRecord::Base
+  validates_presence_of :name
 end
 
 class Article < ActiveRecord::Base
@@ -14,6 +15,10 @@ module FakutoriSan
     
     def minimal
       { 'name' => 'Eloy' }
+    end
+    
+    def invalid
+      {}
     end
   end
   
@@ -107,6 +112,12 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     instance = @factory.create_one
     instance.should.not.be.new_record
     instance.attributes.except('id').should == @factory.plan_one
+  end
+  
+  it "should not perform validations by default" do
+    instance = @factory.create_one(:invalid)
+    instance.should.not.be.new_record
+    instance.should.not.be.valid
   end
   
   it "should take an optional first plan `type', which invokes the method by the same name" do
