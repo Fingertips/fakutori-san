@@ -16,7 +16,7 @@ module Namespaced
 end
 
 module FakutoriSan
-  class Member < Fakutori
+  class MemberFakutori < Fakutori
     def default
       { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
     end
@@ -36,7 +36,7 @@ module FakutoriSan
     end
   end
   
-  class Foo < Fakutori
+  class FooFakutori < Fakutori
     for_model Article
   end
 end
@@ -88,13 +88,13 @@ Test::Unit::TestCase.send(:extend, SharedSpecsHelper)
 describe "FakutoriSan::Fakutori, concerning setup" do
   it "should automatically find the model class based on the factory class's name and initialize an instance the factory subclass" do
     factory = FakutoriSan.factories[Member]
-    factory.should.be.instance_of FakutoriSan::Member
+    factory.should.be.instance_of FakutoriSan::MemberFakutori
     factory.model.should.be Member
   end
   
   it "should allow a user to explicitly define the model class when automatically finding the right class fails" do
     factory = FakutoriSan.factories[Article]
-    factory.should.be.instance_of FakutoriSan::Foo
+    factory.should.be.instance_of FakutoriSan::FooFakutori
     factory.model.should.be Article
   end
 end

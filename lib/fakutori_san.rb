@@ -25,7 +25,8 @@ module FakutoriSan
   class Fakutori
     class << self
       def inherited(factory_klass)
-        factory_klass.for_model Object.const_get(factory_klass.name.sub(/^FakutoriSan::/, '')) rescue NameError
+        factory_klass.for_model Object.const_get(factory_klass.name.gsub(/^FakutoriSan::|Fakutori$/, ''))
+      rescue NameError
       end
       
       def for_model(model)
