@@ -1,8 +1,6 @@
 module FakutoriSan
-  class << self
-    def factories
-      @factories ||= {}
-    end
+  def self.factories
+    @factories ||= {}
   end
   
   class Collection < Array
@@ -21,8 +19,7 @@ module FakutoriSan
   class Fakutori
     class << self
       def inherited(factory_klass)
-        factory_klass.for_model Object.const_get(factory_klass.name.sub(/^FakutoriSan::/, ''))
-      rescue NameError
+        factory_klass.for_model Object.const_get(factory_klass.name.sub(/^FakutoriSan::/, '')) rescue NameError
       end
       
       def for_model(model)
@@ -119,6 +116,10 @@ module FakutoriSan
   end
 end
 
-def Fakutori(model)
-  FakutoriSan.factories[model]
+module Kernel
+  def Fakutori(model)
+    FakutoriSan.factories[model]
+  end
+  
+  private :Fakutori
 end
