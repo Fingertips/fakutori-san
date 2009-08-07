@@ -42,7 +42,7 @@ module FakutoriSan
 end
 
 module SharedSpecsHelper
-  def define_collection_specs_for(type)
+  def define_shared_specs_for(type)
     it "should call ##{type}_one multiple times and return an array of the resulting attribute hashes" do
       attributes = { 'name' => 'Eloy' }
       
@@ -67,6 +67,19 @@ module SharedSpecsHelper
       collection = @factory.send(type, 2)
       collection.should.be.instance_of FakutoriSan::Collection
       collection.factory.should.be @factory
+    end
+    
+    unless type == :plan
+      it "should extend each instance returned by FakutoriSan with the FakutoriSan::AssociateTo module" do
+        instance = @factory.send(type)
+        
+        @factory.expects(:associate).with(instance, Article, nil)
+        instance.associate_to(Article)
+        
+        options = {}
+        @factory.expects(:associate).with(instance, Article, options)
+        instance.associate_to(Article, options)
+      end
     end
   end
 end
@@ -98,7 +111,7 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
     @factory = Fakutori(Member)
   end
   
-  define_collection_specs_for :plan
+  define_shared_specs_for :plan
   
   it "should return a hash of attributes" do
     @factory.plan_one.should == { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
@@ -120,7 +133,7 @@ describe "FakutoriSan::Fakutori, concerning `building'" do
     @factory = Fakutori(Member)
   end
   
-  define_collection_specs_for :build
+  define_shared_specs_for :build
   
   it "should build one instance with the default plan" do
     instance = @factory.build_one
@@ -144,7 +157,7 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     @factory = Fakutori(Member)
   end
   
-  define_collection_specs_for :create
+  define_shared_specs_for :create
   
   it "should create one instance with the default plan" do
     instance = @factory.create_one

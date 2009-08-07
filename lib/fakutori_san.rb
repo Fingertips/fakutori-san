@@ -16,6 +16,12 @@ module FakutoriSan
     end
   end
   
+  module AssociateTo
+    def associate_to(model, options = nil)
+      @__factory__.associate(self, model, options)
+    end
+  end
+  
   class Fakutori
     class << self
       def inherited(factory_klass)
@@ -43,7 +49,10 @@ module FakutoriSan
     end
     
     def build_one(*type_and_or_attributes)
-      @model.new(plan_one(*type_and_or_attributes))
+      instance = @model.new(plan_one(*type_and_or_attributes))
+      instance.extend(AssociateTo)
+      instance.instance_variable_set(:@__factory__, self)
+      instance
     end
     
     def build(*times_and_or_type_and_or_attributes)
