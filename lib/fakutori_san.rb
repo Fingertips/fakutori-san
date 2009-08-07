@@ -5,6 +5,15 @@ module FakutoriSan
     end
   end
   
+  class Collection < Array
+    attr_reader :factory
+    
+    def initialize(factory, times)
+      @factory = factory
+      super(times)
+    end
+  end
+  
   class Fakutori
     class << self
       def inherited(factory_klass)
@@ -73,7 +82,7 @@ module FakutoriSan
     def multiple_times(type, args)
       m = "#{type}_one"
       if times = extract_times(args)
-        Array.new(times) { send(m, *args) }
+        Collection.new(self, times) { send(m, *args) }
       else
         send(m, *args)
       end

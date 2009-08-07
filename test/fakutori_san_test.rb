@@ -31,22 +31,28 @@ module SharedSpecsHelper
   def define_collection_specs_for(type)
     it "should call ##{type}_one multiple times and return an array of the resulting attribute hashes" do
       attributes = { 'name' => 'Eloy' }
-
+      
       @factory.expects("#{type}_one").with(attributes).times(2).returns({})
       @factory.send(type, 2, attributes).should == [{}, {}]
-
+      
       @factory.expects("#{type}_one").with(:minimal, attributes).times(2).returns({})
       @factory.send(type, 2, :minimal, attributes).should == [{}, {}]
     end
-
+    
     it "should not call ##{type}_one multiple times if no `times' argument is given" do
       attributes = { 'name' => 'Eloy' }
-
+      
       @factory.expects("#{type}_one").with(attributes).times(1).returns({})
       @factory.send(type, attributes).should == {}
-
+      
       @factory.expects("#{type}_one").with(:minimal, attributes).times(1).returns({})
       @factory.send(type, :minimal, attributes).should == {}
+    end
+    
+    it "should return a FakutoriSan::Collection instance when a collection is created" do
+      collection = @factory.send(type, 2)
+      collection.should.be.instance_of FakutoriSan::Collection
+      collection.factory.should.be @factory
     end
   end
 end
@@ -63,6 +69,13 @@ describe "FakutoriSan::Fakutori, concerning setup" do
     factory = FakutoriSan.factories[Article]
     factory.should.be.instance_of FakutoriSan::Foo
     factory.model.should.be Article
+  end
+end
+
+describe "The top level Fakutori method" do
+  it "should return the factory belonging to the given model" do
+    Fakutori(Member).should.be FakutoriSan.factories[Member]
+    Fakutori(Article).should.be FakutoriSan.factories[Article]
   end
 end
 
@@ -160,12 +173,5 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     
     @factory.expects(:create_one).with(:minimal, attributes, true).times(2).returns({})
     @factory.create!(2, :minimal, attributes)
-  end
-end
-
-describe "The top level Fakutori method" do
-  it "should return the factory belonging to the given model" do
-    Fakutori(Member).should.be FakutoriSan.factories[Member]
-    Fakutori(Article).should.be FakutoriSan.factories[Article]
   end
 end
