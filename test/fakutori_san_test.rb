@@ -27,6 +27,31 @@ module FakutoriSan
   end
 end
 
+module SharedSpecsHelper
+  def define_collection_specs_for(type)
+    it "should call ##{type}_one multiple times and return an array of the resulting attribute hashes" do
+      attributes = { 'name' => 'Eloy' }
+
+      @factory.expects("#{type}_one").with(attributes).times(2).returns({})
+      @factory.send(type, 2, attributes).should == [{}, {}]
+
+      @factory.expects("#{type}_one").with(:minimal, attributes).times(2).returns({})
+      @factory.send(type, 2, :minimal, attributes).should == [{}, {}]
+    end
+
+    it "should not call ##{type}_one multiple times if no `times' argument is given" do
+      attributes = { 'name' => 'Eloy' }
+
+      @factory.expects("#{type}_one").with(attributes).times(1).returns({})
+      @factory.send(type, attributes).should == {}
+
+      @factory.expects("#{type}_one").with(:minimal, attributes).times(1).returns({})
+      @factory.send(type, :minimal, attributes).should == {}
+    end
+  end
+end
+Test::Unit::TestCase.send(:extend, SharedSpecsHelper)
+
 describe "FakutoriSan::Fakutori, concerning setup" do
   it "should automatically find the model class based on the factory class's name and initialize an instance the factory subclass" do
     factory = FakutoriSan.factories[Member]
@@ -46,6 +71,8 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
     @factory = Fakutori(Member)
   end
   
+  define_collection_specs_for :plan
+  
   it "should return a hash of attributes" do
     @factory.plan_one.should == { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
   end
@@ -59,32 +86,14 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
     @factory.plan_one(:minimal).should == { 'name' => 'Eloy' }
     @factory.plan_one(:minimal, 'email' => 'eloy@example.com').should == { 'name' => 'Eloy', 'email' => 'eloy@example.com' }
   end
-  
-  it "should call #plan_one multiple times and return an array of the resulting attribute hashes" do
-    attributes = { 'name' => 'Eloy' }
-    
-    @factory.expects(:plan_one).with(attributes).times(2).returns({})
-    @factory.plan(2, attributes).should == [{}, {}]
-    
-    @factory.expects(:plan_one).with(:minimal, attributes).times(2).returns({})
-    @factory.plan(2, :minimal, attributes).should == [{}, {}]
-  end
-  
-  it "should not call #plan_one multiple times if no `times' argument is given" do
-    attributes = { 'name' => 'Eloy' }
-    
-    @factory.expects(:plan_one).with(attributes).times(1).returns({})
-    @factory.plan(attributes).should == {}
-    
-    @factory.expects(:plan_one).with(:minimal, attributes).times(1).returns({})
-    @factory.plan(:minimal, attributes).should == {}
-  end
 end
 
 describe "FakutoriSan::Fakutori, concerning `building'" do
   before do
     @factory = Fakutori(Member)
   end
+  
+  define_collection_specs_for :build
   
   it "should build one instance with the default plan" do
     instance = @factory.build_one
@@ -101,32 +110,14 @@ describe "FakutoriSan::Fakutori, concerning `building'" do
     instance.should.be.new_record
     instance.attributes.except('password').should == @factory.plan_one(:minimal, 'email' => 'eloy@example.com')
   end
-  
-  it "should call #build_one multiple times and return an array of the resulting instances" do
-    attributes = { 'name' => 'Eloy' }
-    
-    @factory.expects(:build_one).with(attributes).times(2).returns({})
-    @factory.build(2, attributes).should == [{}, {}]
-    
-    @factory.expects(:build_one).with(:minimal, attributes).times(2).returns({})
-    @factory.build(2, :minimal, attributes).should == [{}, {}]
-  end
-  
-  it "should not call #build_one multiple times if no `times' argument is given" do
-    attributes = { 'name' => 'Eloy' }
-    
-    @factory.expects(:build_one).with(attributes).times(1).returns({})
-    @factory.build(attributes).should == {}
-    
-    @factory.expects(:build_one).with(:minimal, attributes).times(1).returns({})
-    @factory.build(:minimal, attributes).should == {}
-  end
 end
 
 describe "FakutoriSan::Fakutori, concerning `creating'" do
   before do
     @factory = Fakutori(Member)
   end
+  
+  define_collection_specs_for :create
   
   it "should create one instance with the default plan" do
     instance = @factory.create_one
@@ -148,26 +139,6 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     instance = @factory.create_one(:minimal, 'email' => 'eloy@example.com')
     instance.should.not.be.new_record
     instance.attributes.except('id', 'password').should == @factory.plan_one(:minimal, 'email' => 'eloy@example.com')
-  end
-  
-  it "should call #create_one multiple times and return an array of the resulting record instances" do
-    attributes = { 'name' => 'Eloy' }
-    
-    @factory.expects(:create_one).with(attributes).times(2).returns({})
-    @factory.create(2, attributes).should == [{}, {}]
-    
-    @factory.expects(:create_one).with(:minimal, attributes).times(2).returns({})
-    @factory.create(2, :minimal, attributes).should == [{}, {}]
-  end
-  
-  it "should not call #create_one multiple times if no `times' argument is given" do
-    attributes = { 'name' => 'Eloy' }
-    
-    @factory.expects(:create_one).with(attributes).times(1).returns({})
-    @factory.create(attributes).should == {}
-    
-    @factory.expects(:create_one).with(:minimal, attributes).times(1).returns({})
-    @factory.create(:minimal, attributes).should == {}
   end
   
   it "should perform validations and raise an exception if created with #create_one!" do
