@@ -77,9 +77,9 @@ module FakutoriSan
       multiple_times :create, times_and_or_type_and_or_attributes
     end
     
-    def create!(*args)
-      args << true
-      create(*args)
+    def create!(*times_and_or_type_and_or_attributes)
+      times_and_or_type_and_or_attributes << true
+      create(*times_and_or_type_and_or_attributes)
     end
     
     def associate(record, to_model, options = nil)
