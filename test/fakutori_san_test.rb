@@ -214,6 +214,12 @@ describe "FakutoriSan::Fakutori, concerning associating records" do
     @factory.expects(:associate_to_article).with(@record, Article, options)
     @factory.associate(@record, Article, options)
   end
+  
+  it "should raise an NoMethodError if an association builder method doesn't exist for a given model" do
+    lambda {
+      @factory.associate(@record, Unrelated, {})
+    }.should.raise NoMethodError
+  end
 end
 
 describe "FakutoriSan::Collection, concerning associating records" do

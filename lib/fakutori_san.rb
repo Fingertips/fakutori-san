@@ -84,6 +84,8 @@ module FakutoriSan
     def associate(record, to_model, options)
       if builder = association_builder_for(to_model)
         send(builder, record, to_model, options)
+      else
+        raise NoMethodError, "#{self.class.name} has no association builder defined for given model `#{to_model.inspect}'."
       end
     end
     
