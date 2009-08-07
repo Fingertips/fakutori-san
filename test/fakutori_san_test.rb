@@ -78,15 +78,11 @@ module SharedSpecsHelper
     end
     
     unless type == :plan
-      it "should extend each instance returned by FakutoriSan with the FakutoriSan::AssociateTo module" do
-        instance = @factory.send(type)
-        
-        @factory.expects(:associate).with(instance, Article, nil)
-        instance.associate_to(Article)
-        
-        options = {}
-        @factory.expects(:associate).with(instance, Article, options)
-        instance.associate_to(Article, options)
+      it "should extend each instance returned by FakutoriSan with the FakutoriSan::FakutoriExt module" do
+        instance = @factory.create_one
+        FakutoriSan::FakutoriExt.instance_methods.each do |method|
+          instance.should.respond_to method
+        end
       end
     end
   end
@@ -297,10 +293,27 @@ describe "FakutoriSan::Fakutori, concerning `scenes'" do
       @factory.scene(:does_not_exist, @factory.build_one)
     }.should.raise NoMethodError
   end
+end
+
+describe "FakutoriSan::FakutoriExt" do
+  before do
+    @factory = Fakutori(Member)
+  end
   
-  xit "should invoke a scene method if it exists and return self" do
-    instance = @factory.create_one.apply_scene(:with_name, :name => 'Alloy')
-    instance.should.not.be.new_record
-    instance.name.should == 'Alloy'
+  it "should call Fakutori#associate with the record and options given" do
+    instance = @factory.create_one
+    
+    @factory.expects(:associate).with(instance, Article, nil)
+    instance.associate_to(Article)
+    
+    options = {}
+    @factory.expects(:associate).with(instance, Article, options)
+    instance.associate_to(Article, options)
+  end
+  
+  it "should call Fakutori#scene with the record and options given" do
+    instance = @factory.create_one
+    instance.apply_scene(:with_name).name.should == 'Eloy'
+    instance.apply_scene(:with_name, :name => 'Alloy').reload.name.should == 'Alloy'
   end
 end

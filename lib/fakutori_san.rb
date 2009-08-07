@@ -18,9 +18,13 @@ module FakutoriSan
     end
   end
   
-  module AssociateTo
+  module FakutoriExt
     def associate_to(model, options = nil)
       @__factory__.associate(self, model, options)
+    end
+    
+    def apply_scene(name, options = {})
+      @__factory__.scene(name, self, options)
     end
   end
   
@@ -54,7 +58,7 @@ module FakutoriSan
     
     def build_one(*type_and_or_attributes)
       instance = @model.new(plan_one(*type_and_or_attributes))
-      instance.extend(AssociateTo)
+      instance.extend(FakutoriExt)
       instance.instance_variable_set(:@__factory__, self)
       instance
     end
