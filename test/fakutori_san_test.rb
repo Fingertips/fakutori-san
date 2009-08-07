@@ -11,6 +11,10 @@ module FakutoriSan
     def default
       { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
     end
+    
+    def minimal
+      { 'name' => 'Eloy' }
+    end
   end
   
   class Foo < Fakutori
@@ -32,48 +36,85 @@ describe "FakutoriSan::Fakutori, concerning setup" do
   end
 end
 
-describe "FakutoriSan::Fakutori, concerning `plans'" do
-  it "should return a hash of attributes" do
-    Fakutori(Member).plan_one.should == { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
+describe "FakutoriSan::Fakutori, concerning `planning'" do
+  before do
+    @factory = Fakutori(Member)
   end
   
-  it "should return an array attribute hashes" do
-    Fakutori(Member).plan(2).should == [
-      { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' },
-      { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
-    ]
+  it "should return a hash of attributes" do
+    @factory.plan_one.should == { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
+  end
+  
+  it "should merge the given attributes onto the resulting attributes hash" do
+    @factory.plan_one('name' => 'Alloy', 'password' => 'supersecret').should ==
+      { 'name' => 'Alloy', 'email' => 'eloy@example.com', 'password' => 'supersecret' }
+  end
+  
+  it "should take an optional first plan `type', which invokes the method by the same name" do
+    @factory.plan_one(:minimal).should == { 'name' => 'Eloy' }
+    @factory.plan_one(:minimal, 'email' => 'eloy@example.com').should == { 'name' => 'Eloy', 'email' => 'eloy@example.com' }
+  end
+  
+  it "should call #plan_one multiple times and return an array of the resulting attribute hashes" do
+    attributes = {}
+    @factory.expects(:plan_one).with(attributes).times(2).returns({})
+    @factory.plan(2, attributes)
   end
 end
 
 describe "FakutoriSan::Fakutori, concerning `building'" do
-  it "should build one instance with the default plan" do
-    instance = Fakutori(Member).build_one
-    instance.should.be.new_record
-    instance.attributes.should == Fakutori(Member).plan_one
+  before do
+    @factory = Fakutori(Member)
   end
   
-  it "should return an of instances build with the default plan" do
-    instances = Fakutori(Member).build(2)
-    instances.each do |instance|
-      instance.should.be.new_record
-      instance.attributes.should == Fakutori(Member).plan_one
-    end
+  it "should build one instance with the default plan" do
+    instance = @factory.build_one
+    instance.should.be.new_record
+    instance.attributes.should == @factory.plan_one
+  end
+  
+  it "should take an optional first plan `type', which invokes the method by the same name" do
+    instance = @factory.build_one(:minimal)
+    instance.should.be.new_record
+    instance.attributes.except('password', 'email').should == @factory.plan_one(:minimal)
+    
+    instance = @factory.build_one(:minimal, 'email' => 'eloy@example.com')
+    instance.should.be.new_record
+    instance.attributes.except('password').should == @factory.plan_one(:minimal, 'email' => 'eloy@example.com')
+  end
+  
+  it "should call #build_one multiple times and return an array of the resulting instances" do
+    attributes = {}
+    @factory.expects(:build_one).with(attributes).times(2).returns({})
+    @factory.build(2, attributes)
   end
 end
 
 describe "FakutoriSan::Fakutori, concerning `creating'" do
-  it "should create one instance with the default plan" do
-    instance = Fakutori(Member).create_one
-    instance.should.not.be.new_record
-    instance.attributes.except('id').should == Fakutori(Member).plan_one
+  before do
+    @factory = Fakutori(Member)
   end
   
-  it "should return an of instances build with the default plan" do
-    instances = Fakutori(Member).create(2)
-    instances.each do |instance|
-      instance.should.not.be.new_record
-      instance.attributes.except('id').should == Fakutori(Member).plan_one
-    end
+  it "should create one instance with the default plan" do
+    instance = @factory.create_one
+    instance.should.not.be.new_record
+    instance.attributes.except('id').should == @factory.plan_one
+  end
+  
+  it "should take an optional first plan `type', which invokes the method by the same name" do
+    instance = @factory.create_one(:minimal)
+    instance.should.not.be.new_record
+    instance.attributes.except('id', 'password', 'email').should == @factory.plan_one(:minimal)
+    
+    instance = @factory.create_one(:minimal, 'email' => 'eloy@example.com')
+    instance.should.not.be.new_record
+    instance.attributes.except('id', 'password').should == @factory.plan_one(:minimal, 'email' => 'eloy@example.com')
+  end
+  
+  it "should call #create_one multiple times and return an array of the resulting record instances" do
+    attributes = {}
+    @factory.expects(:create_one).with(attributes).times(2).returns({})
+    @factory.create(2, attributes)
   end
 end
 

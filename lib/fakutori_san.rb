@@ -23,9 +23,9 @@ module FakutoriSan
       @model = model
     end
     
-    def plan_one(options = {})
-      options[:type] ||= :default
-      send(options[:type])
+    def plan_one(*type_and_or_attributes)
+      type, attributes = extract_type_and_attributes(type_and_or_attributes)
+      send(type).merge(attributes)
     end
     
     def plan(times = nil, options = {})
@@ -34,8 +34,8 @@ module FakutoriSan
       end
     end
     
-    def build_one(options = {})
-      @model.new(plan_one(options))
+    def build_one(*type_and_or_attributes)
+      @model.new(plan_one(*type_and_or_attributes))
     end
     
     def build(times = nil, options = {})
@@ -44,8 +44,8 @@ module FakutoriSan
       end
     end
     
-    def create_one(options = {})
-      instance = build_one(options)
+    def create_one(*type_and_or_attributes)
+      instance = build_one(*type_and_or_attributes)
       instance.save
       instance
     end
@@ -54,6 +54,14 @@ module FakutoriSan
       if times
         Array.new(times) { create_one(options) }
       end
+    end
+    
+    private
+    
+    def extract_type_and_attributes(args)
+      attributes = args.extract_options!
+      type = args.first || :default
+      [type, attributes]
     end
   end
 end
