@@ -28,9 +28,9 @@ module FakutoriSan
       send(type).merge(attributes)
     end
     
-    def plan(times = nil, options = {})
+    def plan(times = nil, *type_and_or_attributes)
       if times
-        Array.new(times) { plan_one(options) }
+        Array.new(times) { plan_one(*type_and_or_attributes) }
       end
     end
     
@@ -38,9 +38,9 @@ module FakutoriSan
       @model.new(plan_one(*type_and_or_attributes))
     end
     
-    def build(times = nil, options = {})
+    def build(times = nil, *type_and_or_attributes)
       if times
-        Array.new(times) { build_one(options) }
+        Array.new(times) { build_one(*type_and_or_attributes) }
       end
     end
     
@@ -50,9 +50,9 @@ module FakutoriSan
       instance
     end
     
-    def create(times = nil, options = {})
+    def create(times = nil, *type_and_or_attributes)
       if times
-        Array.new(times) { create_one(options) }
+        Array.new(times) { create_one(*type_and_or_attributes) }
       end
     end
     

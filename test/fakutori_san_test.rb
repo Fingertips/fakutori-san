@@ -56,9 +56,13 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
   end
   
   it "should call #plan_one multiple times and return an array of the resulting attribute hashes" do
-    attributes = {}
+    attributes = { 'name' => 'Eloy' }
+    
     @factory.expects(:plan_one).with(attributes).times(2).returns({})
     @factory.plan(2, attributes)
+    
+    @factory.expects(:plan_one).with(:minimal, attributes).times(2).returns({})
+    @factory.plan(2, :minimal, attributes)
   end
 end
 
@@ -84,9 +88,13 @@ describe "FakutoriSan::Fakutori, concerning `building'" do
   end
   
   it "should call #build_one multiple times and return an array of the resulting instances" do
-    attributes = {}
+    attributes = { 'name' => 'Eloy' }
+    
     @factory.expects(:build_one).with(attributes).times(2).returns({})
     @factory.build(2, attributes)
+    
+    @factory.expects(:build_one).with(:minimal, attributes).times(2).returns({})
+    @factory.build(2, :minimal, attributes)
   end
 end
 
@@ -112,9 +120,13 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
   end
   
   it "should call #create_one multiple times and return an array of the resulting record instances" do
-    attributes = {}
+    attributes = { 'name' => 'Eloy' }
+    
     @factory.expects(:create_one).with(attributes).times(2).returns({})
     @factory.create(2, attributes)
+    
+    @factory.expects(:create_one).with(:minimal, attributes).times(2).returns({})
+    @factory.create(2, :minimal, attributes)
   end
 end
 
