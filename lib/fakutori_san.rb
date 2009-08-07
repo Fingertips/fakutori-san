@@ -24,18 +24,12 @@ module FakutoriSan
     end
     
     def plan_one(*type_and_or_attributes)
-      type, attributes = extract_type_and_attributes(type_and_or_attributes)
+      type, attributes = type_and_attributes(type_and_or_attributes)
       send(type).merge(attributes)
     end
     
     def plan(*times_and_or_type_and_or_attributes)
-      args = times_and_or_type_and_or_attributes
-      
-      if times = extract_times(args)
-        Array.new(times) { plan_one(*args) }
-      else
-        plan_one(*args)
-      end
+      multiple_times :plan, times_and_or_type_and_or_attributes
     end
     
     def build_one(*type_and_or_attributes)
@@ -43,13 +37,7 @@ module FakutoriSan
     end
     
     def build(*times_and_or_type_and_or_attributes)
-      args = times_and_or_type_and_or_attributes
-      
-      if times = extract_times(args)
-        Array.new(times) { build_one(*args) }
-      else
-        build_one(*args)
-      end
+      multiple_times :build, times_and_or_type_and_or_attributes
     end
     
     BOOLS = [true, false]
@@ -72,13 +60,7 @@ module FakutoriSan
     end
     
     def create(*times_and_or_type_and_or_attributes)
-      args = times_and_or_type_and_or_attributes
-      
-      if times = extract_times(args)
-        Array.new(times) { create_one(*args) }
-      else
-        create_one(*args)
-      end
+      multiple_times :create, times_and_or_type_and_or_attributes
     end
     
     def create!(*args)
@@ -88,10 +70,18 @@ module FakutoriSan
     
     private
     
-    def extract_type_and_attributes(args)
+    def multiple_times(type, args)
+      m = "#{type}_one"
+      if times = extract_times(args)
+        Array.new(times) { send(m, *args) }
+      else
+        send(m, *args)
+      end
+    end
+    
+    def type_and_attributes(args)
       attributes = args.extract_options!
-      type = args.pop || :default
-      [type, attributes]
+      [args.pop || :default, attributes]
     end
     
     def extract_times(args)
