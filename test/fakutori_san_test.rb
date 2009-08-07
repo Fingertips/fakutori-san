@@ -175,3 +175,21 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     @factory.create!(2, :minimal, attributes)
   end
 end
+
+describe "FakutoriSan::Collection, concerning associating records" do
+  before do
+    @factory = Fakutori(Member)
+    @collection = @factory.create!(2)
+  end
+  
+  it "should call #associate on each member and forward the given model and arguments" do
+    attributes = { 'name' => 'Eloy' }
+    @collection.each { |record| @factory.expects(:associate).with(record, Article, attributes) }
+    @collection.associate_to(Article, attributes)
+  end
+  
+  it "should return itself after associating so the user can chain calls" do
+    @factory.stubs(:associate)
+    @collection.associate_to(Article, {}).should.be @collection
+  end
+end

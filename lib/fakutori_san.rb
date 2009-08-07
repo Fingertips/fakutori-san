@@ -12,6 +12,10 @@ module FakutoriSan
       @factory = factory
       super(times)
     end
+    
+    def associate_to(model, attributes = {})
+      each { |record| @factory.associate(record, model, attributes) }
+    end
   end
   
   class Fakutori
@@ -81,6 +85,7 @@ module FakutoriSan
     
     def multiple_times(type, args)
       m = "#{type}_one"
+      
       if times = extract_times(args)
         Collection.new(self, times) { send(m, *args) }
       else
