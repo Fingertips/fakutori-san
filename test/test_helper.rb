@@ -41,4 +41,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string :email
     t.string :password
   end
+  
+  create_table :articles do |t|
+  end
 end

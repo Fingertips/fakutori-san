@@ -7,6 +7,14 @@ end
 class Article < ActiveRecord::Base
 end
 
+class Unrelated
+end
+
+module Namespaced
+  class Article
+  end
+end
+
 module FakutoriSan
   class Member < Fakutori
     def default
@@ -19,6 +27,12 @@ module FakutoriSan
     
     def invalid
       {}
+    end
+    
+    def associate_to_article(member, article, options)
+    end
+    
+    def associate_to_namespaced_article(member, article, options)
     end
   end
   
@@ -176,6 +190,32 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
   end
 end
 
+describe "FakutoriSan::Fakutori, concerning associating records" do
+  before do
+    @factory = Fakutori(Member)
+    @record = @factory.create_one
+  end
+  
+  it "should return the association builder method if it exists for the given model" do
+    @factory.send(:association_builder_for, Article).should == :associate_to_article
+    @factory.send(:association_builder_for, Article.new).should == :associate_to_article
+    
+    @factory.send(:association_builder_for, Namespaced::Article).should == :associate_to_namespaced_article
+    @factory.send(:association_builder_for, Namespaced::Article.new).should == :associate_to_namespaced_article
+  end
+  
+  it "should return nil if no association builder method can be found for the given model" do
+    @factory.send(:association_builder_for, Unrelated).should == nil
+    @factory.send(:association_builder_for, Unrelated.new).should == nil
+  end
+  
+  it "should call a builder method if it exists for the given model class" do
+    options = {}
+    @factory.expects(:associate_to_article).with(@record, Article, options)
+    @factory.associate(@record, Article, options)
+  end
+end
+
 describe "FakutoriSan::Collection, concerning associating records" do
   before do
     @factory = Fakutori(Member)
@@ -183,13 +223,12 @@ describe "FakutoriSan::Collection, concerning associating records" do
   end
   
   it "should call #associate on each member and forward the given model and arguments" do
-    attributes = { 'name' => 'Eloy' }
-    @collection.each { |record| @factory.expects(:associate).with(record, Article, attributes) }
-    @collection.associate_to(Article, attributes)
+    options = { 'name' => 'Eloy' }
+    @collection.each { |record| @factory.expects(:associate).with(record, Article, options) }
+    @collection.associate_to(Article, options)
   end
   
   it "should return itself after associating so the user can chain calls" do
-    @factory.stubs(:associate)
     @collection.associate_to(Article, {}).should.be @collection
   end
 end

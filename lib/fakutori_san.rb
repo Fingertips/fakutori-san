@@ -13,8 +13,8 @@ module FakutoriSan
       super(times)
     end
     
-    def associate_to(model, attributes = {})
-      each { |record| @factory.associate(record, model, attributes) }
+    def associate_to(model, options = {})
+      each { |record| @factory.associate(record, model, options) }
     end
   end
   
@@ -81,7 +81,22 @@ module FakutoriSan
       create(*args)
     end
     
+    def associate(record, to_model, options)
+      if builder = association_builder_for(to_model)
+        send(builder, record, to_model, options)
+      end
+    end
+    
     private
+    
+    def type_and_attributes(args)
+      attributes = args.extract_options!
+      [args.pop || :default, attributes]
+    end
+    
+    def extract_times(args)
+      args.shift if args.first.is_a?(Numeric)
+    end
     
     def multiple_times(type, args)
       m = "#{type}_one"
@@ -93,13 +108,10 @@ module FakutoriSan
       end
     end
     
-    def type_and_attributes(args)
-      attributes = args.extract_options!
-      [args.pop || :default, attributes]
-    end
-    
-    def extract_times(args)
-      args.shift if args.first.is_a?(Numeric)
+    def association_builder_for(model)
+      klass = model.is_a?(Class) ? model : model.class
+      name = "associate_to_#{klass.name.underscore.gsub('/', '_')}".to_sym
+      name if respond_to?(name)
     end
   end
 end
