@@ -220,6 +220,11 @@ describe "FakutoriSan::Fakutori, concerning associating records" do
       @factory.associate(@record, Unrelated, {})
     }.should.raise NoMethodError
   end
+  
+  it "should only forward the options hash if it's given by the user" do
+    @factory.expects(:associate_to_article).with(@record, Article)
+    @factory.associate(@record, Article)
+  end
 end
 
 describe "FakutoriSan::Collection, concerning associating records" do
@@ -236,5 +241,10 @@ describe "FakutoriSan::Collection, concerning associating records" do
   
   it "should return itself after associating so the user can chain calls" do
     @collection.associate_to(Article, {}).should.be @collection
+  end
+  
+  it "should forward the options as `nil' by default" do
+    @collection.each { |record| @factory.expects(:associate).with(record, Article, nil) }
+    @collection.associate_to(Article)
   end
 end

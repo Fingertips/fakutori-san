@@ -13,7 +13,7 @@ module FakutoriSan
       super(times)
     end
     
-    def associate_to(model, options = {})
+    def associate_to(model, options = nil)
       each { |record| @factory.associate(record, model, options) }
     end
   end
@@ -53,11 +53,6 @@ module FakutoriSan
       multiple_times :build, times_and_or_type_and_or_attributes
     end
     
-    BOOLS = [true, false]
-    
-    # type:
-    # attributes:
-    # validate:
     def create_one(*type_and_or_attributes_and_or_validate)
       args = type_and_or_attributes_and_or_validate
       
@@ -81,15 +76,21 @@ module FakutoriSan
       create(*args)
     end
     
-    def associate(record, to_model, options)
+    def associate(record, to_model, options = nil)
       if builder = association_builder_for(to_model)
-        send(builder, record, to_model, options)
+        if options
+          send(builder, record, to_model, options)
+        else
+          send(builder, record, to_model)
+        end
       else
         raise NoMethodError, "#{self.class.name} has no association builder defined for given model `#{to_model.inspect}'."
       end
     end
     
     private
+    
+    BOOLS = [true, false]
     
     def type_and_attributes(args)
       attributes = args.extract_options!
