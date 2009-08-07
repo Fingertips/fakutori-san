@@ -104,6 +104,12 @@ describe "The top level Fakutori method" do
     Fakutori(Member).should.be FakutoriSan.factories[Member]
     Fakutori(Article).should.be FakutoriSan.factories[Article]
   end
+  
+  it "should raise a FakutoriSan::FakutoriMissing exception if no factory can be found" do
+    lambda {
+      Fakutori(Unrelated)
+    }.should.raise FakutoriSan::FakutoriMissing
+  end
 end
 
 describe "FakutoriSan::Fakutori, concerning `planning'" do

@@ -1,4 +1,6 @@
 module FakutoriSan
+  class FakutoriMissing < NameError; end
+  
   def self.factories
     @factories ||= {}
   end
@@ -128,7 +130,7 @@ end
 
 module Kernel
   def Fakutori(model)
-    FakutoriSan.factories[model]
+    FakutoriSan.factories[model] || raise(FakutoriSan::FakutoriMissing, "No factory defined for model `#{model}'")
   end
   
   private :Fakutori
