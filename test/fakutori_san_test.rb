@@ -64,10 +64,20 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
     attributes = { 'name' => 'Eloy' }
     
     @factory.expects(:plan_one).with(attributes).times(2).returns({})
-    @factory.plan(2, attributes)
+    @factory.plan(2, attributes).should == [{}, {}]
     
     @factory.expects(:plan_one).with(:minimal, attributes).times(2).returns({})
-    @factory.plan(2, :minimal, attributes)
+    @factory.plan(2, :minimal, attributes).should == [{}, {}]
+  end
+  
+  it "should not call #plan_one multiple times if no `times' argument is given" do
+    attributes = { 'name' => 'Eloy' }
+    
+    @factory.expects(:plan_one).with(attributes).times(1).returns({})
+    @factory.plan(attributes).should == {}
+    
+    @factory.expects(:plan_one).with(:minimal, attributes).times(1).returns({})
+    @factory.plan(:minimal, attributes).should == {}
   end
 end
 
@@ -96,10 +106,20 @@ describe "FakutoriSan::Fakutori, concerning `building'" do
     attributes = { 'name' => 'Eloy' }
     
     @factory.expects(:build_one).with(attributes).times(2).returns({})
-    @factory.build(2, attributes)
+    @factory.build(2, attributes).should == [{}, {}]
     
     @factory.expects(:build_one).with(:minimal, attributes).times(2).returns({})
-    @factory.build(2, :minimal, attributes)
+    @factory.build(2, :minimal, attributes).should == [{}, {}]
+  end
+  
+  it "should not call #build_one multiple times if no `times' argument is given" do
+    attributes = { 'name' => 'Eloy' }
+    
+    @factory.expects(:build_one).with(attributes).times(1).returns({})
+    @factory.build(attributes).should == {}
+    
+    @factory.expects(:build_one).with(:minimal, attributes).times(1).returns({})
+    @factory.build(:minimal, attributes).should == {}
   end
 end
 
@@ -134,14 +154,26 @@ describe "FakutoriSan::Fakutori, concerning `creating'" do
     attributes = { 'name' => 'Eloy' }
     
     @factory.expects(:create_one).with(attributes).times(2).returns({})
-    @factory.create(2, attributes)
+    @factory.create(2, attributes).should == [{}, {}]
     
     @factory.expects(:create_one).with(:minimal, attributes).times(2).returns({})
-    @factory.create(2, :minimal, attributes)
+    @factory.create(2, :minimal, attributes).should == [{}, {}]
+  end
+  
+  it "should not call #create_one multiple times if no `times' argument is given" do
+    attributes = { 'name' => 'Eloy' }
+    
+    @factory.expects(:create_one).with(attributes).times(1).returns({})
+    @factory.create(attributes).should == {}
+    
+    @factory.expects(:create_one).with(:minimal, attributes).times(1).returns({})
+    @factory.create(:minimal, attributes).should == {}
   end
   
   it "should perform validations and raise an exception if created with #create_one!" do
-    lambda { @factory.create_one!(:invalid) }.should.raise ActiveRecord::RecordInvalid
+    lambda {
+      @factory.create_one!(:invalid)
+    }.should.raise ActiveRecord::RecordInvalid
     
     lambda {
       instance = @factory.create_one!(:minimal, 'password' => '12345')

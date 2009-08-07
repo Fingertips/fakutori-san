@@ -28,9 +28,13 @@ module FakutoriSan
       send(type).merge(attributes)
     end
     
-    def plan(times = nil, *type_and_or_attributes)
-      if times
-        Array.new(times) { plan_one(*type_and_or_attributes) }
+    def plan(*times_and_or_type_and_or_attributes)
+      args = times_and_or_type_and_or_attributes
+      
+      if times = extract_times(args)
+        Array.new(times) { plan_one(*args) }
+      else
+        plan_one(*args)
       end
     end
     
@@ -38,9 +42,13 @@ module FakutoriSan
       @model.new(plan_one(*type_and_or_attributes))
     end
     
-    def build(times = nil, *type_and_or_attributes)
-      if times
-        Array.new(times) { build_one(*type_and_or_attributes) }
+    def build(*times_and_or_type_and_or_attributes)
+      args = times_and_or_type_and_or_attributes
+      
+      if times = extract_times(args)
+        Array.new(times) { build_one(*args) }
+      else
+        build_one(*args)
       end
     end
     
@@ -63,9 +71,13 @@ module FakutoriSan
       create_one(*type_and_or_attributes)
     end
     
-    def create(times = nil, *type_and_or_attributes)
-      if times
-        Array.new(times) { create_one(*type_and_or_attributes) }
+    def create(*times_and_or_type_and_or_attributes)
+      args = times_and_or_type_and_or_attributes
+      
+      if times = extract_times(args)
+        Array.new(times) { create_one(*args) }
+      else
+        create_one(*args)
       end
     end
     
@@ -78,8 +90,12 @@ module FakutoriSan
     
     def extract_type_and_attributes(args)
       attributes = args.extract_options!
-      type = args.first || :default
+      type = args.pop || :default
       [type, attributes]
+    end
+    
+    def extract_times(args)
+      args.shift if args.first.is_a?(Numeric)
     end
   end
 end
