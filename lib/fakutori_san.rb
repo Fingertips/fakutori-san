@@ -1,6 +1,12 @@
+# = FakutoriSan
+#
+# As its description, FakutoriSan aims to be a lean model factory. As it uses
+# vanilla Ruby to define the factories, you can use class inheritance and all
+# other standard Ruby practices.
 module FakutoriSan
   class FakutoriMissing < NameError; end
   
+  # Returns a hash of the available <tt>model => factory</tt> pairs.
   def self.factories
     @factories ||= {}
   end
@@ -36,7 +42,8 @@ module FakutoriSan
   class Fakutori
     class << self
       def inherited(factory_klass)
-        factory_klass.for_model Object.const_get(factory_klass.name.gsub(/^FakutoriSan::|Fakutori$/, ''))
+        model_klass = Object.const_get(factory_klass.name.gsub(/^FakutoriSan::|Fakutori$/, ''))
+        factory_klass.for_model model_klass
       rescue NameError
       end
       
