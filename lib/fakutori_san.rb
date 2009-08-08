@@ -110,7 +110,7 @@ module FakutoriSan
     
     def scene(name, record_or_collection, options = {})
       method = "#{name}_scene"
-      raise NoMethodError, "#{self.class.name} has no scene method called `#{name.inspect}'" unless respond_to?(method)
+      raise NoMethodError, "#{self.class.name} has no scene method for scene `#{name.inspect}'" unless respond_to?(method)
       
       if record_or_collection.is_a?(Array)
         record_or_collection.each_with_index do |record, index|
