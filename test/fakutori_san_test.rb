@@ -17,19 +17,19 @@ end
 
 module FakutoriSan
   class MemberFakutori < Fakutori
-    def default
+    def valid_attrs
       { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
     end
     
-    def minimal
+    def minimal_attrs
       { 'name' => 'Eloy' }
     end
     
-    def invalid
+    def invalid_attrs
       {}
     end
     
-    def with_arg(arg)
+    def with_arg_attrs(arg)
       { 'arg' => arg }
     end
     

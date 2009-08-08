@@ -56,8 +56,14 @@ module FakutoriSan
     
     def plan_one(*type_and_or_attributes)
       type, attributes = type_and_attributes(type_and_or_attributes)
-      plan = method(type).arity.zero? ? send(type) : send(type, attributes)
-      plan.merge(attributes)
+      m = "#{type}_attrs"
+      
+      if respond_to?(m)
+        plan = method(m).arity.zero? ? send(m) : send(m, attributes)
+        plan.merge(attributes)
+      else
+        raise NoMethodError, "#{self.class.name} has no attributes method for `#{name.inspect}'"
+      end
     end
     
     def plan(*times_and_or_type_and_or_attributes)
@@ -104,7 +110,7 @@ module FakutoriSan
           send(*[builder, record, to_model, options].compact)
         end
       else
-        raise NoMethodError, "#{self.class.name} has no association builder defined for model `#{to_model.inspect}'."
+        raise NoMethodError, "#{self.class.name} has no association builder method for model `#{to_model.inspect}'."
       end
       
       record_or_collection
@@ -112,7 +118,9 @@ module FakutoriSan
     
     def scene(name, record_or_collection, options = {})
       method = "#{name}_scene"
-      raise NoMethodError, "#{self.class.name} has no scene method for scene `#{name.inspect}'" unless respond_to?(method)
+      unless respond_to?(method)
+        raise NoMethodError, "#{self.class.name} has no scene method for scene `#{name.inspect}'"
+      end
       
       if record_or_collection.is_a?(Array)
         record_or_collection.each_with_index do |record, index|
@@ -132,7 +140,7 @@ module FakutoriSan
     
     def type_and_attributes(args)
       attributes = args.extract_options!
-      [args.pop || :default, attributes]
+      [args.pop || :valid, attributes]
     end
     
     def extract_times(args)
