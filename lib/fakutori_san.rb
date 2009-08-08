@@ -100,16 +100,13 @@ module FakutoriSan
     
     def associate(record_or_collection, to_model, options = nil)
       if builder = association_builder_for(to_model)
-        if record_or_collection.is_a?(Array)
-          record_or_collection.each do |record|
-            send(*[builder, record, to_model, options].compact)
-          end
-        else
-          send(*[builder, record_or_collection, to_model, options].compact)
+        [*record_or_collection].each do |record|
+          send(*[builder, record, to_model, options].compact)
         end
       else
         raise NoMethodError, "#{self.class.name} has no association builder defined for model `#{to_model.inspect}'."
       end
+      
       record_or_collection
     end
     
