@@ -25,6 +25,7 @@ module FakutoriSan
   module FakutoriExt
     def associate_to(model, options = nil)
       @__factory__.associate(self, model, options)
+      self
     end
     
     def apply_scene(name, options = {})
@@ -104,6 +105,7 @@ module FakutoriSan
       else
         raise NoMethodError, "#{self.class.name} has no association builder defined for model `#{to_model.inspect}'."
       end
+      record
     end
     
     def scene(name, record_or_collection, options = {})

@@ -240,7 +240,7 @@ describe "FakutoriSan::Fakutori, concerning associating records" do
   it "should call a builder method if it exists for the given model class" do
     options = {}
     @factory.expects(:associate_to_article).with(@record, Article, options)
-    @factory.associate(@record, Article, options)
+    @factory.associate(@record, Article, options).should.be @record
   end
   
   it "should raise an NoMethodError if an association builder method doesn't exist for a given model" do
@@ -322,15 +322,15 @@ describe "FakutoriSan::FakutoriExt" do
     @factory = Fakutori(Member)
   end
   
-  it "should call Fakutori#associate with the record and options given" do
+  it "should call Fakutori#associate with the record and options given and return itself" do
     instance = @factory.create_one
     
     @factory.expects(:associate).with(instance, Article, nil)
-    instance.associate_to(Article)
+    instance.associate_to(Article).should.be instance
     
     options = {}
     @factory.expects(:associate).with(instance, Article, options)
-    instance.associate_to(Article, options)
+    instance.associate_to(Article, options).should.be instance
   end
   
   it "should call Fakutori#scene with the record and options given" do
