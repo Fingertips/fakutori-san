@@ -11,23 +11,6 @@ module FakutoriSan
     @factories ||= {}
   end
   
-  class Collection < Array
-    attr_reader :factory
-    
-    def initialize(factory, times)
-      @factory = factory
-      super(times)
-    end
-    
-    def associate_to(model, options = nil)
-      each { |record| @factory.associate(record, model, options) }
-    end
-    
-    def apply_scene(name, options = {})
-      @factory.scene(name, self, options)
-    end
-  end
-  
   module FakutoriExt
     def associate_to(model, options = nil)
       @__factory__.associate(self, model, options)
@@ -36,6 +19,19 @@ module FakutoriSan
     
     def apply_scene(name, options = {})
       @__factory__.scene(name, self, options)
+    end
+  end
+  
+  class Collection < Array
+    include FakutoriExt
+    
+    def initialize(factory, times)
+      @__factory__ = factory
+      super(times)
+    end
+    
+    def factory
+      @__factory__
     end
   end
   
@@ -102,17 +98,19 @@ module FakutoriSan
       create(*times_and_or_type_and_or_attributes)
     end
     
-    def associate(record, to_model, options = nil)
+    def associate(record_or_collection, to_model, options = nil)
       if builder = association_builder_for(to_model)
-        if options
-          send(builder, record, to_model, options)
+        if record_or_collection.is_a?(Array)
+          record_or_collection.each do |record|
+            send(*[builder, record, to_model, options].compact)
+          end
         else
-          send(builder, record, to_model)
+          send(*[builder, record_or_collection, to_model, options].compact)
         end
       else
         raise NoMethodError, "#{self.class.name} has no association builder defined for model `#{to_model.inspect}'."
       end
-      record
+      record_or_collection
     end
     
     def scene(name, record_or_collection, options = {})

@@ -243,6 +243,15 @@ describe "FakutoriSan::Fakutori, concerning associating records" do
     @factory.associate(@record, Article, options).should.be @record
   end
   
+  it "should call a builder method for each member of a collection" do
+    options = {}
+    collection = @factory.create(2)
+    
+    @factory.expects(:associate_to_article).with(collection.first, Article, options)
+    @factory.expects(:associate_to_article).with(collection.last, Article, options)
+    @factory.associate(collection, Article, options).should.be collection
+  end
+  
   it "should raise an NoMethodError if an association builder method doesn't exist for a given model" do
     lambda {
       @factory.associate(@record, Unrelated, {})
@@ -263,7 +272,7 @@ describe "FakutoriSan::Collection, concerning associating records" do
   
   it "should call #associate on each member and forward the given model and arguments" do
     options = { 'name' => 'Eloy' }
-    @collection.each { |record| @factory.expects(:associate).with(record, Article, options) }
+    @factory.expects(:associate).with(@collection, Article, options)
     @collection.associate_to(Article, options)
   end
   
@@ -272,7 +281,7 @@ describe "FakutoriSan::Collection, concerning associating records" do
   end
   
   it "should forward the options as `nil' by default" do
-    @collection.each { |record| @factory.expects(:associate).with(record, Article, nil) }
+    @factory.expects(:associate).with(@collection, Article, nil)
     @collection.associate_to(Article)
   end
 end
