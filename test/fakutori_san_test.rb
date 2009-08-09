@@ -141,6 +141,10 @@ describe "FakutoriSan::Fakutori, concerning `planning'" do
     @factory.plan_one(:minimal).should == { 'name' => 'Eloy' }
     @factory.plan_one(:minimal, 'email' => 'eloy@example.com').should == { 'name' => 'Eloy', 'email' => 'eloy@example.com' }
   end
+  
+  it "should raise a NoMethodError if given a attributes type for which no method exists" do
+    lambda { @factory.plan_one(:unexisting) }.should.raise NoMethodError
+  end
 end
 
 describe "FakutoriSan::Fakutori, concerning `building'" do

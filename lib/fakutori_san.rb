@@ -55,14 +55,15 @@ module FakutoriSan
     end
     
     def plan_one(*type_and_or_attributes)
-      type, attributes = type_and_attributes(type_and_or_attributes)
+      attributes = type_and_or_attributes.extract_options!
+      type = type_and_or_attributes.pop || :valid
       m = "#{type}_attrs"
       
       if respond_to?(m)
         plan = method(m).arity.zero? ? send(m) : send(m, attributes)
         plan.merge(attributes)
       else
-        raise NoMethodError, "#{self.class.name} has no attributes method for `#{name.inspect}'"
+        raise NoMethodError, "#{self.class.name} has no attributes method for type `#{type}'"
       end
     end
     
@@ -71,10 +72,7 @@ module FakutoriSan
     end
     
     def build_one(*type_and_or_attributes)
-      instance = @model.new(plan_one(*type_and_or_attributes))
-      instance.extend(FakutoriExt)
-      instance.instance_variable_set(:@__factory__, self)
-      instance
+      make_chainable(@model.new(plan_one(*type_and_or_attributes)))
     end
     
     def build(*times_and_or_type_and_or_attributes)
@@ -84,7 +82,7 @@ module FakutoriSan
     def create_one(*type_and_or_attributes_and_or_validate)
       args = type_and_or_attributes_and_or_validate
       
-      validate = args.pop if BOOLS.include?(args.last)
+      validate = args.pop if [true, false].include?(args.last)
       instance = build_one(*args)
       validate ? instance.save! : instance.save(false)
       instance
@@ -136,22 +134,17 @@ module FakutoriSan
     
     private
     
-    BOOLS = [true, false]
-    
-    def type_and_attributes(args)
-      attributes = args.extract_options!
-      [args.pop || :valid, attributes]
-    end
-    
-    def extract_times(args)
-      args.shift if args.first.is_a?(Numeric)
+    def make_chainable(instance)
+      instance.extend(FakutoriExt)
+      instance.instance_variable_set(:@__factory__, self)
+      instance
     end
     
     def multiple_times(type, args)
       m = "#{type}_one"
       
-      if times = extract_times(args)
-        Collection.new(self, times) { send(m, *args) }
+      if args.first.is_a?(Numeric)
+        Collection.new(self, args.shift) { send(m, *args) }
       else
         send(m, *args)
       end
