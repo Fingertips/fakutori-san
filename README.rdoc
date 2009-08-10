@@ -1,13 +1,9 @@
-Fakutori-san
-============
+= FakutoriSan
 
-Introduction goes here.
+As its description, FakutoriSan aims to be a lean model factory. As it uses
+vanilla Ruby to define the factories, you can use class inheritance and all
+other standard Ruby practices.
 
-
-Example
-=======
-
-Example goes here.
-
-
-Copyright (c) 2009 [name of plugin creator], released under the MIT license
+TODO:
+* Write documentation
+* Add examples
