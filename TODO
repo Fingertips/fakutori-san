@@ -1,0 +1,10 @@
+* Add scenario blocks which allow you to add a description to a set of Fakutori calls
+
+  scenario 'Calendar with events in multiple venues' do
+    Fakutori(Event).create!(:venue => venues(:melkweg))
+    Fakutori(Event).create!(:venue => venues(:paradiso))
+  end
+
+* Speed up definition of scenarios by somehow dumping the contents of a scenario
+* Invalidate the scenario cache when the file in which it was defined changes
+* Fakutori should circumvent attr_accessible / attr_protected so it's easier to initialize models the way you want them
