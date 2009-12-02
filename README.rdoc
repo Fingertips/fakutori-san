@@ -1,9 +1,41 @@
-= FakutoriSan
+= Fakutori-San
 
-As its description, FakutoriSan aims to be a lean model factory. As it uses
-vanilla Ruby to define the factories, you can use class inheritance and all
-other standard Ruby practices.
+Fakutori-San is an instance factory for your tests. Factories in Fakutori-San
+are plain Ruby classes. It uses a number of naming rules, not magic, to do
+smart things. This means you can use class inheritance and other standard
+Ruby practices to define your factories.
 
-TODO:
-* Write documentation
-* Add examples
+Although Fakutori-San was written to be used in Rails with ActiveRecord it
+only assumes the save method to persist the object. If your objects also
+persist themselves with the save method you're golden.
+
+== Short example
+
+Fakutori-San uses some smart assumptions about methods in your factory class
+so you can easily define all types of situations for your model.
+
+  module FakutoriSan
+    class MemberFakutori < Fakutori
+      def valid_attrs
+        { 'name' => 'Eloy', 'email' => 'eloy@example.com', 'password' => 'secret' }
+      end
+    
+      def invalid_attrs
+        { 'name' => '' }
+      end
+    end
+  end
+
+After you've defined a factory for your model you can instantiate it, for
+instance in the setup method of your test.
+
+  @valid_member = Fakutori(Member).create_one
+  @invalid_member = Fakutori(Member).create_one(:invalid)
+
+Fakutori-San looks for a class called FakutoriSan::MemberFakutori to create a
+Member instance. It also knows that it should use invalid_attrs when creating
+an invalid member. Neat huh?
+
+If you want to learn more about Fakutori-San, please check out the examples,
+the tests, and the implementation. Note that the code is not that long so it's
+not a chore.
