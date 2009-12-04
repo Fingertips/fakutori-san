@@ -1,7 +1,11 @@
 TEST_ROOT_DIR = File.expand_path('..', __FILE__)
 require 'test/unit'
 
-frameworks = %w(activesupport activerecord actionpack)
+frameworks = {
+  'activesupport' => %w(active_support),
+  'activerecord'  => %w(active_record),
+  'actionpack'    => %w(action_controller)
+}
 
 rails = [
   File.expand_path('../../../rails', TEST_ROOT_DIR),
@@ -9,21 +13,21 @@ rails = [
 ].detect do |possible_rails|
   begin
     entries = Dir.entries(possible_rails)
-    frameworks.all? { |framework| entries.include?(framework) }
+    frameworks.keys.all? { |framework| entries.include?(framework) }
   rescue Errno::ENOENT
     false
   end
 end
+frameworks.keys.each { |framework| $:.unshift(File.join(rails, framework, 'lib')) }
 
-frameworks.each { |framework| $:.unshift(File.join(rails, framework, 'lib')) }
 $:.unshift File.join(TEST_ROOT_DIR, '/../lib')
 $:.unshift File.join(TEST_ROOT_DIR, '/lib')
 $:.unshift TEST_ROOT_DIR
 
 ENV['RAILS_ENV'] = 'test'
 
-# Rails libs
-frameworks.each { |framework| require framework }
+# Require Rails components
+frameworks.values.flatten.each { |lib| require lib }
 require File.expand_path('../../rails/init', __FILE__)
 
 # Libraries for testing
@@ -44,4 +48,13 @@ ActiveRecord::Schema.define(:version => 1) do
   
   create_table :articles do |t|
   end
+end
+
+# Require all models and factories used in the tests
+Dir.glob(File.join(TEST_ROOT_DIR, 'models', '**', '*.rb')).each do |model|
+  require model
+end
+
+Dir.glob(File.join(TEST_ROOT_DIR, 'factories', '**', '*.rb')).each do |factory|
+  require factory
 end
